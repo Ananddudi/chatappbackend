@@ -3,6 +3,7 @@ import cors from "cors";
 import { connects } from "./database/setup.js";
 import userRouter from "./routes/userRoute.js";
 import conversationRouter from "./routes/conversationRoute.js";
+import messageRouter from "./routes/message.js";
 const app = express();
 
 app.use(cors());
@@ -10,6 +11,7 @@ app.use(express.json());
 
 app.use("/user", userRouter);
 app.use("/conversation", conversationRouter);
+app.use("/message", messageRouter);
 
 async function starts() {
   try {
