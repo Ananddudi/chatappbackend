@@ -2,46 +2,42 @@ import messageModel from "../models/message.js";
 import conversationModel from "../models/conversation.js";
 
 export const getMessage = async (req, res) => {
-  const email = req.auth;
+  const conversationId = req.params.id;
+  // const user = req.auth;
+  // const { seconduser } = req.body;
   try {
-    const conversation = await conversationModel.find({
-      email: email,
+    //   const conversationone = await conversationModel.findOne({
+    //     user: user,
+    //     reciever: seconduser,
+    //   });
+    //   const conversationtwo = await conversationModel.findOne({
+    //     user: seconduser,
+    //     reciever: user,
+    //   });
+    //   if (!conversationone && !conversationtwo) {
+    //     return res.status(400).json("No conversation found!");
+    //   }
+    //   const conversationid = conversationone && conversationone._id;
+    //   conversationid = conversationtwo && conversation._id;
+    const messages = await messageModel.find({
+      conversationid: conversationId,
     });
-    if (!conversation) {
-      return res.status(400).json("No conversation found!");
-    }
-    const conversationid = conversation._id;
-    const messageis = await new messageModel({
-      conversationid: conversationid,
-      sender: email,
-      message: message,
-    });
-    await messageis.save();
-    res.status(200).json(messageis);
+    res.status(200).json(messages);
   } catch (error) {
     res.status().json(error);
   }
 };
 
 export const createMessage = async (req, res) => {
-  const email = req.auth;
-  const reciever = req.params.reciever;
-  const { message } = req.body;
+  const sender = req.auth;
+  const { conversationId, message } = req.body;
   try {
-    if (!message || !reciever) {
+    if (!message || !conversationId) {
       return res.status(400).json("All fields required!");
     }
-    const conversation = await conversationModel.findOne({
-      email: email,
-      reciever: reciever,
-    });
-    if (!conversation) {
-      return res.status(400).json("No conversation found!");
-    }
-    const conversationid = conversation._id;
     const messageis = await new messageModel({
-      conversationid: conversationid,
-      sender: email,
+      conversationid: conversationId,
+      sender: sender,
       message: message,
     });
     await messageis.save();
@@ -53,20 +49,11 @@ export const createMessage = async (req, res) => {
 
 export const deleteMessage = async (req, res) => {
   const email = req.auth;
-  const reciever = req.params.reciever;
-  const { message } = req.body;
+  const { message, conversationid } = req.body;
   try {
-    if (!message || !reciever) {
+    if (!message || !conversationid) {
       return res.status(400).json("All fields required!");
     }
-    const conversation = await conversationModel.findOne({
-      email: email,
-      reciever: reciever,
-    });
-    if (!conversation) {
-      return res.status(400).json("No conversation found!");
-    }
-    const conversationid = conversation._id;
     await messageModel.findOneAndDelete({
       conversationid: conversationid,
       sender: email,

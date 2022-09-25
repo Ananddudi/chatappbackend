@@ -21,6 +21,24 @@ export async function getUser(req, res) {
   }
 }
 
+export async function userauth(req, res) {
+  const email = req.auth;
+  try {
+    if (!email) {
+      return res.status(500).json("Invalid token");
+    }
+    const user = await userModel.findOne({ email: email });
+    if (!user) {
+      return res.status(500).json("User is not found");
+    }
+    const newuser = { ...user._doc };
+    delete newuser.password;
+    res.status(400).json(newuser);
+  } catch (error) {
+    res.status(400).json(error);
+  }
+}
+
 export async function login(req, res) {
   const { email, password } = req.body;
   try {
@@ -73,7 +91,9 @@ export async function register(req, res) {
       token: token,
     });
     await useris.save();
-    res.status(200).json("User successfully created!");
+    const newuser = { ...useris._doc };
+    delete newuser.password;
+    res.status(200).json(newuser);
   } catch (e) {
     res.status(501).json("An unknown error occurred or " + e);
   }

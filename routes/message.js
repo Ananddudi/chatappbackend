@@ -7,8 +7,8 @@ import {
 import { authorization } from "../controllers/auth.js";
 const messageRouter = express.Router();
 
-messageRouter.route("/getall").get(authorization, getMessage);
-messageRouter.route("/create/:reciever").post(authorization, createMessage);
-messageRouter.route("/delete/:reciever").delete(authorization, deleteMessage);
+messageRouter.route("/getall/:id").get(authorization, getMessage);
+messageRouter.route("/create").post(authorization, createMessage);
+messageRouter.route("/delete").delete(authorization, deleteMessage);
 
 export default messageRouter;

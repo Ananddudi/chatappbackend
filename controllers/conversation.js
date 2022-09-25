@@ -4,29 +4,41 @@ import userModel from "../models/user.js";
 export const allConversation = async (req, res) => {
   const email = req.auth;
   try {
-    const conversation = await conversationModel.find({
+    const conversationfirst = await conversationModel.find({
       user: email,
     });
-    if (!conversation) {
+    const conversationsecond = await conversationModel.find({
+      reciever: email,
+    });
+    if (!conversationfirst || !conversationsecond) {
       return res.status(401).json("No conversation found!");
     }
-    res.status(200).json(conversation);
+    const objs = [...conversationfirst, ...conversationsecond].flat(1);
+    res.status(200).json(objs);
   } catch (error) {
     res.status(500).json("An Error Occurred " + error);
   }
 };
+
 export const getConversation = async (req, res) => {
   const email = req.auth;
-  const reciever = req.params.receiverid;
+  const { reciever } = req.body;
   try {
-    const conversation = await conversationModel.findOne({
+    if (!reciever) {
+      return res.status(500).json("All fields required");
+    }
+    const conversationone = await conversationModel.findOne({
       user: email,
       reciever: reciever,
     });
-    if (!conversation) {
+    const conversationtwo = await conversationModel.findOne({
+      user: reciever,
+      reciever: email,
+    });
+    if (!conversationone && !conversationtwo) {
       return res.status(401).json("No conversation found!");
     }
-    res.status(200).json(conversation);
+    res.status(200).json({ ...conversationone, ...conversationtwo }._doc);
   } catch (error) {
     res.status(500).json("An Error Occurred " + error);
   }
@@ -34,7 +46,7 @@ export const getConversation = async (req, res) => {
 
 export const createConversation = async (req, res) => {
   const email = req.auth;
-  const reciever = req.params.receiverid;
+  const { reciever } = req.body;
   try {
     if (!email || !reciever) {
       return res.status(500).json("All fields must be filled");
@@ -47,12 +59,16 @@ export const createConversation = async (req, res) => {
     if (!validuser) {
       return res.status(500).json("No user as specified in parameters!");
     }
-    const conversationexists = await conversationModel.findOne({
+    const conversationExist = await conversationModel.findOne({
       user: email,
       reciever: reciever,
     });
+    const conversationExists = await conversationModel.findOne({
+      user: reciever,
+      reciever: email,
+    });
 
-    if (conversationexists) {
+    if (conversationExist || conversationExists) {
       return res.status(500).json("Every Conversation Must Be Unique!");
     }
 
